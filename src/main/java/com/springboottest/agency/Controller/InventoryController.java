@@ -3,8 +3,8 @@ package com.springboottest.agency.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;    
+import org.springframework.http.ResponseEntity;   
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +53,13 @@ public class InventoryController {
 //       inventoryService.purchaseProduct(productId, quantity, vendor);
 //       return "Purchase recorded successfully!";
 //  }
+
+@PutMapping("/update-all-prices")
+public ResponseEntity<String> updatePrices(@RequestParam double newPrice) {
+    inventoryService.updateAllProductPrices(newPrice);
+    return ResponseEntity.ok("All product prices updated successfully!");
+}
+
 
 @PostMapping("/purchase")
     public ResponseEntity<String> purchaseProduct(@RequestBody PurchaseRequest request) {

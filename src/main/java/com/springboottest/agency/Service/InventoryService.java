@@ -41,39 +41,87 @@ public class InventoryService {
 
       // ✅ Add a product
     public ProductUser addProduct(ProductUser productUser) {
+
+        // 🔥 Calculate total price = price * stock
+        double total = productUser.getProductPrice() * productUser.getProductStock();
+        productUser.setTotalPrice(total);
+
+
         return productRepo.save(productUser);
     }
 
-    // ✅ Purchase product
-    public void purchaseProduct(Long productId, int quantity, String vendor){
-        ProductUser product = productRepo.findById(productId).orElseThrow();
+    // ✅ Update a product-Price
+    public void updateAllProductPrices(double newPrice) {
 
-         // update stock
-        product.setProductStock(product.getProductStock() + quantity);
-        productRepo.save(product);      
+    List<ProductUser> products = productRepo.findAll();
 
-       // create purchase entry 
-    PurchaseUser purchaseUser = new PurchaseUser();
-    purchaseUser.setVendor(vendor);
-    purchaseUser.setQuantity(quantity);
-    purchaseUser.setDate(LocalDate.now());
-    purchaseUser.setProduct(product);
+    for (ProductUser p : products) {
+
+        // update price
+        p.setProductPrice(newPrice);
+
+        // recalculate total price
+        double total = newPrice * p.getProductStock();
+        p.setTotalPrice(total);
+
+        productRepo.save(p);
+    }
+}
 
 
-    purchaseRepo.save(purchaseUser);
+    
+    // ✅ Purchase product (update stock + total price)
+    public void purchaseProduct(Long productId, int quantity, String vendor) {
+
+        ProductUser product = productRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // update stock
+        int updatedStock = product.getProductStock() + quantity;
+        product.setProductStock(updatedStock);
+
+        // 🔥 Recalculate total price
+        double total = product.getProductPrice() * updatedStock;
+        product.setTotalPrice(total);
+
+        productRepo.save(product);
+
+        // create purchase entry
+        PurchaseUser purchaseUser = new PurchaseUser();
+        purchaseUser.setVendor(vendor);
+        purchaseUser.setQuantity(quantity);
+        purchaseUser.setDate(LocalDate.now());
+        purchaseUser.setProduct(product);
+
+        purchaseRepo.save(purchaseUser);
     }
 
-    // ✅ Sell Product
-    public void saleProduct(Long productId, int quantity, double sellingPrice){
-        ProductUser product = productRepo.findById(productId).orElseThrow();
+
+
+    // ✅ Sell product (update stock + total price)
+    public void saleProduct(Long productId, int quantity, double sellingPrice) {
+
+        ProductUser product = productRepo.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
         if (product.getProductStock() >= quantity) {
-            product.setProductStock(product.getProductStock() - quantity);
+
+            int updatedStock = product.getProductStock() - quantity;
+            product.setProductStock(updatedStock);
+
+            // 🔥 Recalculate total price
+            double total = product.getProductPrice() * updatedStock;
+            product.setTotalPrice(total);
+
             productRepo.save(product);
 
-            SaleUser sale = new SaleUser (quantity, LocalDate.now(), sellingPrice, product);
+            SaleUser sale = new SaleUser(quantity, LocalDate.now(), sellingPrice, product);
             saleRepo.save(sale);
+        } else {
+            throw new RuntimeException("Not enough stock to sell!");
         }
     }
+
 
 
 }

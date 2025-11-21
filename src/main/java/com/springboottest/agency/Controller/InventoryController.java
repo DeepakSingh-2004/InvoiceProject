@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.springboottest.agency.Dto.PurchaseRequest;
+import com.springboottest.agency.Dto.PurchaseRequest;   
 import com.springboottest.agency.Dto.SaleRequest;
-import com.springboottest.agency.Entity.ProductUser;
+import com.springboottest.agency.Entity.ProductUser;   
 import com.springboottest.agency.Service.InventoryService;
 
 @RestController
@@ -54,10 +54,13 @@ public class InventoryController {
 //       return "Purchase recorded successfully!";
 //  }
 
-@PutMapping("/update-all-prices")
-public ResponseEntity<String> updatePrices(@RequestParam double newPrice) {
-    inventoryService.updateAllProductPrices(newPrice);
-    return ResponseEntity.ok("All product prices updated successfully!");
+@PutMapping("/update-price/{id}")
+public ResponseEntity<String> updateProductPrice(
+        @PathVariable Long id,
+        @RequestParam double newPrice) {
+
+    inventoryService.updateProductPrice(id, newPrice);
+    return ResponseEntity.ok("Product price updated successfully!");
 }
 
 
